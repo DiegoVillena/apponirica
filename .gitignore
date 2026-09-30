@@ -16,3 +16,4 @@ local.properties
 # Sistema / temporal
 .DS_Store
 Thumbs.db
+.zcode/

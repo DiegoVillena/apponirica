@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Luna creciente (zona exterior menos círculo interior, ambas centradas fuera del safe zone para que sobresalga bien) -->
+    <path
+        android:fillColor="#F6F2FF"
+        android:fillType="evenOdd"
+        android:pathData="M50,38 A16,16 0 1,0 50,70 A16,16 0 1,0 50,38 Z
+            M53,39.5 A11.5,11.5 0 1,0 53,62.5 A11.5,11.5 0 1,0 53,39.5 Z" />
+
+    <!-- Z grande (dream Z) -->
+    <path
+        android:strokeColor="#F6F2FF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M64,44 H76 L64,58 H76" />
+
+    <!-- z pequeña -->
+    <path
+        android:strokeColor="#F6F2FF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M77,58 H84 L77,66 H84" />
+
+    <!-- Estrellas y puntos del cielo -->
+    <group
+        android:translateX="36"
+        android:translateY="36"
+        android:scaleX="0.5"
+        android:scaleY="0.5">
+        <path
+            android:fillColor="#F6F2FF"
+            android:pathData="M0,-10 C1.8,-2 2,-1.8 10,0 C2,1.8 1.8,2 0,10 C-1.8,2 -2,1.8 -10,0 C-2,-1.8 -1.8,-2 0,-10 Z" />
+    </group>
+    <group
+        android:translateX="74"
+        android:translateY="30"
+        android:scaleX="0.35"
+        android:scaleY="0.35">
+        <path
+            android:fillColor="#F6F2FF"
+            android:fillAlpha="0.8"
+            android:pathData="M0,-10 C1.8,-2 2,-1.8 10,0 C2,1.8 1.8,2 0,10 C-1.8,2 -2,1.8 -10,0 C-2,-1.8 -1.8,-2 0,-10 Z" />
+    </group>
+    <group
+        android:translateX="30"
+        android:translateY="58"
+        android:scaleX="0.6"
+        android:scaleY="0.6">
+        <path
+            android:fillColor="#F6F2FF"
+            android:fillAlpha="0.7"
+            android:pathData="M-2.5,0 A2.5,2.5 0 1,0 2.5,0 A2.5,2.5 0 1,0 -2.5,0 Z" />
+    </group>
+    <group
+        android:translateX="68"
+        android:translateY="78"
+        android:scaleX="0.45"
+        android:scaleY="0.45">
+        <path
+            android:fillColor="#F6F2FF"
+            android:fillAlpha="0.75"
+            android:pathData="M0,-10 C1.8,-2 2,-1.8 10,0 C2,1.8 1.8,2 0,10 C-1.8,2 -2,1.8 -10,0 C-2,-1.8 -1.8,-2 0,-10 Z" />
+    </group>
+</vector>

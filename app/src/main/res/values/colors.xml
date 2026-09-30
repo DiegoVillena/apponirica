@@ -1,0 +1,5 @@
+<resources>
+    <!-- Color de fondo del sistema antes de que Compose arrastre: claro "Amanecer" -->
+    <color name="fondo_ventana">#FAF7FF</color>
+    <color name="indicador_sistema">#7C3AED</color>
+</resources>

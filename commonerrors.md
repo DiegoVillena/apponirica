@@ -1,0 +1,11 @@
+# commonerrors.md — memoria de atascos de AppOnírica
+
+Archivo de problemas donde se atascó una sesión y cómo se resolvió. Leer al inicio de cada tarea.
+
+- **Kotlin: "Unresolved reference 'NavigationBarItem'" con el import correcto** → `NavigationBarItem` es una función de EXTENSIÓN de `RowScope`: solo compila dentro del lambda de contenido de `NavigationBar {}` (o declarando el helper como `RowScope.MiItem`). Diagnosticado con `javap` del facade del AAR ( primer parámetro `RowScope`).
+- **Room: FTS4 `MATCH` con alias de tabla falla en la verificación de KSP** ("no such column: f") → usar el nombre REAL de la tabla delante de `MATCH`: `... INNER JOIN dreams_fts ON dreams.rowid = dreams_fts.rowid WHERE dreams_fts MATCH :q` (el patrón de la doc oficial de Room no usa alias para el FTS).
+- **Contaminación de borradores al escribir ficheros**: varios .kt se crearon con fragmentos de razonamiento mezclados en el contenido (líneas tipo `?? no —`, placeholders). Mitigación: tras cada tanda de escrituras grandes, barrido de `grep -rnF -e '??' -e '—' -e 'wait' -e 'NOTE' --include='*.kt' app/src` y reescribir el fichero entero si aparece basura. (Además: `data class` de soporte definida solo "en la cabeza" y nunca en el fichero → compilar pronto para detectarlo.)
+- **Las MCP tools `android_*` cortan a 30 s** aunque se pida más timeout → los builds largos lanzarlos con `./gradlew ... ` vía Bash en `run_in_background` y sondear el log; el emulador arranca con `android_start_emulator` (la llamada peta a 30 s pero el emulador sigue arrancando: sondar con `android_list_devices`).
+- **`android_logs` con applicationId puede venir vacío/truncado en un crash temprano** → filtrar con adb directo: `adb logcat -d | grep -E 'FATAL|AndroidRuntime|<paquete>'`.
+- **Este PC no tiene Gradle en PATH ni sdkmanager/cmdline-tools** → el wrapper DEBE estar en el repo (copiado del bootstrap de wikiloklocal); no esperar a instalar paquetes del SDK sin antes instalar cmdline-tools.
+- **El micrófono del emulador no proporciona voz real** → el SpeechRecognizer acaba en ERROR_NO_MATCH/-SPEECH_TIMEOUT; es el fallback esperado, no un bug. La voz real se prueba en dispositivo físico.

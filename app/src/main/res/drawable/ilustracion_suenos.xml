@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="190dp"
+    android:viewportWidth="240"
+    android:viewportHeight="190">
+
+    <!-- Luna creciente grande -->
+    <path
+        android:fillColor="#A78BFA"
+        android:fillAlpha="0.9"
+        android:fillType="evenOdd"
+        android:pathData="M118,32 A46,46 0 1,0 118,124 A46,46 0 1,0 118,32 Z
+            M127,37 A32,32 0 1,0 127,101 A32,32 0 1,0 127,37 Z" />
+
+    <!-- Estrellas -->
+    <group
+        android:translateX="46"
+        android:translateY="30"
+        android:scaleX="0.85"
+        android:scaleY="0.85">
+        <path
+            android:fillColor="#E9E4FF"
+            android:fillAlpha="0.95"
+            android:pathData="M0,-10 C1.8,-2 2,-1.8 10,0 C2,1.8 1.8,2 0,10 C-1.8,2 -2,1.8 -10,0 C-2,-1.8 -1.8,-2 0,-10 Z" />
+    </group>
+    <group
+        android:translateX="204"
+        android:translateY="36"
+        android:scaleX="0.5"
+        android:scaleY="0.5">
+        <path
+            android:fillColor="#E9E4FF"
+            android:fillAlpha="0.8"
+            android:pathData="M0,-10 C1.8,-2 2,-1.8 10,0 C2,1.8 1.8,2 0,10 C-1.8,2 -2,1.8 -10,0 C-2,-1.8 -1.8,-2 0,-10 Z" />
+    </group>
+    <group
+        android:translateX="40"
+        android:translateY="124"
+        android:scaleX="0.5"
+        android:scaleY="0.5">
+        <path
+            android:fillColor="#E9E4FF"
+            android:fillAlpha="0.75"
+            android:pathData="M0,-10 C1.8,-2 2,-1.8 10,0 C2,1.8 1.8,2 0,10 C-1.8,2 -2,1.8 -10,0 C-2,-1.8 -1.8,-2 0,-10 Z" />
+    </group>
+    <group
+        android:translateX="206"
+        android:translateY="118"
+        android:scaleX="0.95"
+        android:scaleY="0.95">
+        <path
+            android:fillColor="#E9E4FF"
+            android:fillAlpha="0.9"
+            android:pathData="M0,-10 C1.8,-2 2,-1.8 10,0 C2,1.8 1.8,2 0,10 C-1.8,2 -2,1.8 -10,0 C-2,-1.8 -1.8,-2 0,-10 Z" />
+    </group>
+    <group
+        android:translateX="150"
+        android:translateY="158"
+        android:scaleX="0.4"
+        android:scaleY="0.4">
+        <path
+            android:fillColor="#E9E4FF"
+            android:fillAlpha="0.7"
+            android:pathData="M0,-10 C1.8,-2 2,-1.8 10,0 C2,1.8 1.8,2 0,10 C-1.8,2 -2,1.8 -10,0 C-2,-1.8 -1.8,-2 0,-10 Z" />
+    </group>
+
+    <!-- Puntos de cielo -->
+    <group
+        android:translateX="24"
+        android:translateY="70"
+        android:scaleX="0.6"
+        android:scaleY="0.6">
+        <path
+            android:fillColor="#E9E4FF"
+            android:fillAlpha="0.55"
+            android:pathData="M-2.5,0 A2.5,2.5 0 1,0 2.5,0 A2.5,2.5 0 1,0 -2.5,0 Z" />
+    </group>
+    <group
+        android:translateX="222"
+        android:translateY="64"
+        android:scaleX="0.7"
+        android:scaleY="0.7">
+        <path
+            android:fillColor="#E9E4FF"
+            android:fillAlpha="0.55"
+            android:pathData="M-2.5,0 A2.5,2.5 0 1,0 2.5,0 A2.5,2.5 0 1,0 -2.5,0 Z" />
+    </group>
+    <group
+        android:translateX="160"
+        android:translateY="22"
+        android:scaleX="0.45"
+        android:scaleY="0.45">
+        <path
+            android:fillColor="#E9E4FF"
+            android:fillAlpha="0.5"
+            android:pathData="M-2.5,0 A2.5,2.5 0 1,0 2.5,0 A2.5,2.5 0 1,0 -2.5,0 Z" />
+    </group>
+    <group
+        android:translateX="76"
+        android:translateY="172"
+        android:scaleX="0.5"
+        android:scaleY="0.5">
+        <path
+            android:fillColor="#E9E4FF"
+            android:fillAlpha="0.45"
+            android:pathData="M-2.5,0 A2.5,2.5 0 1,0 2.5,0 A2.5,2.5 0 1,0 -2.5,0 Z" />
+    </group>
+</vector>
