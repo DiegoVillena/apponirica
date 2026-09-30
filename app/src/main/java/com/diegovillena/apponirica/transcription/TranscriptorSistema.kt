@@ -60,6 +60,10 @@ class TranscriptorSistema(contexto: Context) : Transcriptor {
     private val _textoFinal = MutableSharedFlow<String>(extraBufferCapacity = 1)
     override val textoFinal: SharedFlow<String> = _textoFinal.asSharedFlow()
 
+    override val ficheroAudio: StateFlow<String?> = MutableStateFlow<String?>(null)
+
+    override val cadenaAuto: Boolean = true
+
     private val listener = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {
             _rms.value = 0f

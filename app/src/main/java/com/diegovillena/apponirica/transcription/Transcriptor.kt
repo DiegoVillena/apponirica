@@ -10,13 +10,20 @@ sealed interface EstadoTranscriptor {
     data class Error(val mensaje: String, val codigo: Int = -1) : EstadoTranscriptor
 }
 
-/** Contrato de transcripción de voz a texto: intercambiable entre el recognizer del sistema y motores offline. */
+/** Motores de transcripción disponibles para elegir en Ajustes. */
+enum class MotorTranscripcion { OFFLINE, GOOGLE }
+
+/** Contrato de transcripción de voz a texto: intercambiable entre motor local y el del sistema. */
 interface Transcriptor {
     val estado: StateFlow<EstadoTranscriptor>
     val textoParcial: StateFlow<String>
     /** Volumen normalizado 0..1 para animar el botón de grabación. */
     val rms: StateFlow<Float>
     val textoFinal: SharedFlow<String>
+    /** Fichero de audio de la última sesión de escucha (null si el motor no lo captura). */
+    val ficheroAudio: StateFlow<String?>
+    /** true si el motor corta sus sesiones por sí solo (Google) y hay que reencadenar escuchas. */
+    val cadenaAuto: Boolean
 
     fun iniciar()
 

@@ -12,7 +12,9 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExtendedFloatingActionButton
+import com.diegovillena.apponirica.transcription.MotorTranscripcion
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +23,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -36,6 +39,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.diegovillena.apponirica.AppOniricaApplication
+import com.diegovillena.apponirica.ui.ajustes.AjustesScreen
 import com.diegovillena.apponirica.ui.captura.CapturaScreen
 import com.diegovillena.apponirica.ui.captura.CapturaViewModel
 import com.diegovillena.apponirica.ui.detalle.DetalleScreen
@@ -48,6 +52,7 @@ import com.diegovillena.apponirica.ui.estadisticas.EstadisticasViewModel
 
 private const val RutaDiario = "diario?stem={stem}&display={display}"
 private const val RutaEstadisticas = "estadisticas"
+private const val RutaAjustes = "ajustes"
 private const val RutaCaptura = "captura"
 private const val RutaDetalle = "detalle/{id}"
 
@@ -79,6 +84,7 @@ fun AppNavHost() {
                 NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                     Pestaña(navController, "Diario", Icons.Filled.Bedtime, RutaDiario, "diario", rutaActual, "tab-diario")
                     Pestaña(navController, "Estadísticas", Icons.Filled.BarChart, RutaEstadisticas, "estadisticas", rutaActual, "tab-estadisticas")
+                    Pestaña(navController, "Ajustes", Icons.Filled.Settings, RutaAjustes, "ajustes", rutaActual, "tab-ajustes")
                 }
             }
         },
@@ -119,9 +125,16 @@ fun AppNavHost() {
                     },
                 )
             }
+            composable(RutaAjustes) {
+                val motor by contenedor.motor.collectAsState(initial = MotorTranscripcion.OFFLINE)
+                AjustesScreen(
+                    motor = motor,
+                    onElegirMotor = { nuevo -> contenedor.fijarMotor(nuevo) },
+                )
+            }
             composable(RutaCaptura) {
                 val vm: CapturaViewModel = viewModel(initializer = {
-                    CapturaViewModel(contenedor.repositorio, contenedor.transcriptor, contenedor.grabadora)
+                    CapturaViewModel(contenedor.repositorio, contenedor.transcriptorPara())
                 })
                 CapturaScreen(vm = vm, onVolver = { navController.popBackStack() })
             }

@@ -11,6 +11,7 @@ import com.diegovillena.apponirica.data.db.PalabraClave
 import com.diegovillena.apponirica.data.db.SuenoPalabraClave
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
@@ -68,11 +69,15 @@ class RepositorioSuenos(
 
     suspend fun eliminarSueno(id: Long) = db.withTransaction {
         val vinculos = dao.vinculosDe(id)
+        val dreamViejo = dao.obtener(id)
         dao.eliminar(id)
         val ahora = System.currentTimeMillis()
         vinculos.forEach { vinculo ->
             val otros = dao.contarOtrosVinculosPorStem(vinculo.stem, id)
             daoPalabras.aplicarDelta(vinculo.stem, -vinculo.tf, if (otros == 0) -1 else 0, ahora)
+        }
+        dreamViejo?.sueno?.audioPath?.let { ruta ->
+            runCatching { File(ruta).delete() }
         }
         daoPalabras.purgarHuerfanas()
     }
