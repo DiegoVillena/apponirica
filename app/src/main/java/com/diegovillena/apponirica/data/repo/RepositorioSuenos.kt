@@ -92,8 +92,9 @@ class RepositorioSuenos(
             dao.eliminar(id)
             val ahora = System.currentTimeMillis()
             vinculos.forEach { vinculo ->
-                val otros = dao.contarOtrosVinculosPorStem(vinculo.stem, id)
-                daoPalabras.aplicarDelta(vinculo.stem, -vinculo.tf, if (otros == 0) -1 else 0, ahora)
+                // El sueño borrado aportaba SIEMPRE una presencia al dreamCount y su tf al
+                // TOTAL: se restan ambos; la keyword huérfana la limpia purgarHuerfanas.
+                daoPalabras.aplicarDelta(vinculo.stem, -vinculo.tf, -1, ahora)
             }
             dreamViejo?.sueno?.audioPath?.let { ruta ->
                 runCatching { File(ruta).delete() }
