@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -61,6 +62,18 @@ fun DiarioScreen(
     val suenos by vm.suenos.collectAsState()
     val consulta by vm.consulta.collectAsState()
     val filtro by vm.filtro.collectAsState()
+
+    val estadoLista = rememberLazyListState()
+
+    LaunchedEffect(
+        suenos.firstOrNull()?.sueno?.id,
+        filtro,
+        consulta,
+    ) {
+        // Con un sueño nuevo arriba, el estado scrolleado de guardado lo esconde fuera de
+        // pantalla: al cambiar la primera fila (cree/borre/filtre) la vista vuelve a la cima.
+        if (suenos.isNotEmpty()) estadoLista.scrollToItem(0)
+    }
 
     LaunchedEffect(filtroInicial) {
         if (filtroInicial != null) vm.filtrarPor(filtroInicial)
@@ -155,6 +168,7 @@ fun DiarioScreen(
             }
         } else {
             LazyColumn(
+                state = estadoLista,
                 modifier = Modifier.fillMaxWidth().weight(1f).testTag("lista-suenos"),
                 contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 116.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),

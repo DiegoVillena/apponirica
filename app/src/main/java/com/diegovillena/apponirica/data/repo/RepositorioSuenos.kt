@@ -9,8 +9,11 @@ import com.diegovillena.apponirica.data.db.Dream
 import com.diegovillena.apponirica.data.db.DreamConPalabras
 import com.diegovillena.apponirica.data.db.PalabraClave
 import com.diegovillena.apponirica.data.db.SuenoPalabraClave
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import java.io.File
 import java.time.Instant
 import java.time.LocalDate
@@ -25,6 +28,7 @@ data class Estadisticas(
 )
 
 /** Única puerta de entrada a la base de datos: guarda, edita, borra y recalcula keywords. */
+@OptIn(ExperimentalCoroutinesApi::class)
 class RepositorioSuenos(
     private val db: AppDatabase,
     private val extractor: ExtractoraPalabrasClave,
@@ -32,7 +36,14 @@ class RepositorioSuenos(
     private val dao = db.dreamDao()
     private val daoPalabras = db.palabraClaveDao()
 
-    fun listar(): Flow<List<DreamConPalabras>> = dao.listarTodo()
+    /** Contador de escrituras: la invalidación automática de Room no reemite los flows de
+     *  listas de forma fiable en caliente (tras guardar/borrar la UI mostraba datos viejos),
+     *  así que cada escritura incrementa esto y los flows de lectura re-cargan sobre la señal. */
+    private val version = MutableStateFlow(0L)
+
+    private fun marcarCambio() { version.value += 1 }
+
+    fun listar(): Flow<List<DreamConPalabras>> = version.flatMapLatest { dao.listarTodo() }
 
     suspend fun guardarSueno(
         texto: String,
@@ -44,42 +55,52 @@ class RepositorioSuenos(
         audioPath: String?,
         origen: String,
         ahora: Long = System.currentTimeMillis(),
-    ): Long = db.withTransaction {
-        val dream = Dream(
-            titulo = titulo.ifBlank { "Sueño sin título" },
-            texto = texto,
-            audioPath = audioPath,
-            origenTexto = origen,
-            esLucido = lucido,
-            esPesadilla = pesadilla,
-            mood = mood,
-            claridad = claridad,
-            createdAt = ahora,
-            dreamAt = ahora,
-        )
-        val id = dao.insertarSueno(dream)
-        aplicarPalabras(id, extraer(texto))
-        id
+    ): Long {
+        val id = db.withTransaction {
+            val dream = Dream(
+                titulo = titulo.ifBlank { "Sueño sin título" },
+                texto = texto,
+                audioPath = audioPath,
+                origenTexto = origen,
+                esLucido = lucido,
+                esPesadilla = pesadilla,
+                mood = mood,
+                claridad = claridad,
+                createdAt = ahora,
+                dreamAt = ahora,
+            )
+            val idNuevo = dao.insertarSueno(dream)
+            aplicarPalabras(idNuevo, extraer(texto))
+            idNuevo
+        }
+        marcarCambio()
+        return id
     }
 
-    suspend fun actualizarSueno(dream: Dream) = db.withTransaction {
-        dao.actualizarSueno(dream)
-        aplicarPalabras(dream.id, extraer(dream.texto))
+    suspend fun actualizarSueno(dream: Dream) {
+        db.withTransaction {
+            dao.actualizarSueno(dream)
+            aplicarPalabras(dream.id, extraer(dream.texto))
+        }
+        marcarCambio()
     }
 
-    suspend fun eliminarSueno(id: Long) = db.withTransaction {
-        val vinculos = dao.vinculosDe(id)
-        val dreamViejo = dao.obtener(id)
-        dao.eliminar(id)
-        val ahora = System.currentTimeMillis()
-        vinculos.forEach { vinculo ->
-            val otros = dao.contarOtrosVinculosPorStem(vinculo.stem, id)
-            daoPalabras.aplicarDelta(vinculo.stem, -vinculo.tf, if (otros == 0) -1 else 0, ahora)
+    suspend fun eliminarSueno(id: Long) {
+        db.withTransaction {
+            val vinculos = dao.vinculosDe(id)
+            val dreamViejo = dao.obtener(id)
+            dao.eliminar(id)
+            val ahora = System.currentTimeMillis()
+            vinculos.forEach { vinculo ->
+                val otros = dao.contarOtrosVinculosPorStem(vinculo.stem, id)
+                daoPalabras.aplicarDelta(vinculo.stem, -vinculo.tf, if (otros == 0) -1 else 0, ahora)
+            }
+            dreamViejo?.sueno?.audioPath?.let { ruta ->
+                runCatching { File(ruta).delete() }
+            }
+            daoPalabras.purgarHuerfanas()
         }
-        dreamViejo?.sueno?.audioPath?.let { ruta ->
-            runCatching { File(ruta).delete() }
-        }
-        daoPalabras.purgarHuerfanas()
+        marcarCambio()
     }
 
     suspend fun obtenerPorId(id: Long): DreamConPalabras? = dao.obtener(id)
@@ -92,17 +113,19 @@ class RepositorioSuenos(
 
     suspend fun suenosPorPalabra(stem: String): List<DreamConPalabras> = dao.suenosDePalabra(stem)
 
-    val estadisticas: Flow<Estadisticas> = combine(
-        dao.contarSuenos(),
-        dao.fechasSuenos(),
-        daoPalabras.topPalabras(20),
-    ) { total, fechas, top ->
-        Estadisticas(
-            totalSuenos = total,
-            diasRacha = calcularRacha(fechas),
-            meses = contarPorMes(fechas),
-            topPalabras = top,
-        )
+    val estadisticas: Flow<Estadisticas> = version.flatMapLatest {
+        combine(
+            dao.contarSuenos(),
+            dao.fechasSuenos(),
+            daoPalabras.topPalabras(20),
+        ) { total, fechas, top ->
+            Estadisticas(
+                totalSuenos = total,
+                diasRacha = calcularRacha(fechas),
+                meses = contarPorMes(fechas),
+                topPalabras = top,
+            )
+        }
     }
 
     private fun extraer(texto: String): List<PalabraClaveExtraida> =

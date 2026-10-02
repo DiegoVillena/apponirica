@@ -11,6 +11,8 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -175,92 +177,98 @@ fun CapturaScreen(vm: CapturaViewModel, onVolver: () -> Unit) {
         }
         Spacer(Modifier.height(18.dp))
 
-        val avisoVm by vm.aviso.collectAsState()
-        val aviso: String? = avisoVm
-            ?: if (permisoDenegado) "Sin permiso de micrófono: escribe tu sueño a mano." else null
-        if (aviso != null) {
-            Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.tertiaryContainer) {
-                Text(
-                    aviso,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
-                )
+        // El relato crece con el sueño: el formulario scrollea y el botón de guardar queda
+        // FIJO abajo — con un texto largo no se pierde de la pantalla.
+        Column(
+            Modifier.weight(1f).verticalScroll(rememberScrollState()),
+        ) {
+            val avisoVm by vm.aviso.collectAsState()
+            val aviso: String? = avisoVm
+                ?: if (permisoDenegado) "Sin permiso de micrófono: escribe tu sueño a mano." else null
+            if (aviso != null) {
+                Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.tertiaryContainer) {
+                    Text(
+                        aviso,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
+                    )
+                }
+                Spacer(Modifier.height(14.dp))
             }
+
+            TextField(
+                value = if (escuchaActiva && parcial.isNotBlank()) {
+                    (texto + " " + parcial).trim()
+                } else {
+                    texto
+                },
+                onValueChange = { if (!grabando) vm.actualizarTexto(it) },
+                placeholder = {
+                    Text(
+                        "Habla tu sueño…\no escribe a mano",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                shape = RoundedCornerShape(20.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
+                minLines = 5,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 190.dp)
+                    .testTag("campo-texto")
+                    .onFocusChanged { if (it.isFocused) vm.fijarCampoActivo(CampoActivo.RELATO) },
+            )
             Spacer(Modifier.height(14.dp))
+
+            TextField(
+                value = if (campoActivo == CampoActivo.TITULO && escuchaActiva && parcial.isNotBlank()) {
+                    (titulo + " " + parcial).trim()
+                } else {
+                    titulo
+                },
+                onValueChange = { if (!grabando) vm.actualizarTitulo(it) },
+                placeholder = {
+                    Text(
+                        "Título (opcional)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                shape = RoundedCornerShape(16.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("campo-titulo")
+                    .onFocusChanged { if (it.isFocused) vm.fijarCampoActivo(CampoActivo.TITULO) },
+            )
+            Spacer(Modifier.height(14.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                MarcaChip("Lúcido", Icons.Filled.AutoAwesome, Ambar, lucido, onAlternar = vm::alternarLucido)
+                MarcaChip("Pesadilla", Icons.Filled.DarkMode, Coral, pesadilla, onAlternar = vm::alternarPesadilla)
+            }
+            Spacer(Modifier.height(18.dp))
+            SelectorMarcado("Ánimo (1–5)", mood, vm::marcarMood)
+            Spacer(Modifier.height(14.dp))
+            SelectorMarcado("Claridad (1–5)", claridad, vm::marcarClaridad)
+            Spacer(Modifier.height(18.dp))
         }
 
-        TextField(
-            value = if (escuchaActiva && parcial.isNotBlank()) {
-                (texto + " " + parcial).trim()
-            } else {
-                texto
-            },
-            onValueChange = { if (!grabando) vm.actualizarTexto(it) },
-            placeholder = {
-                Text(
-                    "Habla tu sueño…\no escribe a mano",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            },
-            shape = RoundedCornerShape(20.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                cursorColor = MaterialTheme.colorScheme.primary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
-            minLines = 5,
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 190.dp)
-                .testTag("campo-texto")
-                .onFocusChanged { if (it.isFocused) vm.fijarCampoActivo(CampoActivo.RELATO) },
-        )
-        Spacer(Modifier.height(14.dp))
-
-        TextField(
-            value = if (campoActivo == CampoActivo.TITULO && escuchaActiva && parcial.isNotBlank()) {
-                (titulo + " " + parcial).trim()
-            } else {
-                titulo
-            },
-            onValueChange = { if (!grabando) vm.actualizarTitulo(it) },
-            placeholder = {
-                Text(
-                    "Título (opcional)",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            },
-            shape = RoundedCornerShape(16.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                cursorColor = MaterialTheme.colorScheme.primary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("campo-titulo")
-                .onFocusChanged { if (it.isFocused) vm.fijarCampoActivo(CampoActivo.TITULO) },
-        )
-        Spacer(Modifier.height(14.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            MarcaChip("Lúcido", Icons.Filled.AutoAwesome, Ambar, lucido, onAlternar = vm::alternarLucido)
-            MarcaChip("Pesadilla", Icons.Filled.DarkMode, Coral, pesadilla, onAlternar = vm::alternarPesadilla)
-        }
-        Spacer(Modifier.height(18.dp))
-        SelectorMarcado("Ánimo (1–5)", mood, vm::marcarMood)
-        Spacer(Modifier.height(14.dp))
-        SelectorMarcado("Claridad (1–5)", claridad, vm::marcarClaridad)
-
-        Spacer(Modifier.weight(1f))
         Button(
             onClick = { scope.launch { vm.guardar(); onVolver() } },
             enabled = texto.isNotBlank() && !grabando,

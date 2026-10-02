@@ -1,6 +1,8 @@
 package com.diegovillena.apponirica.ui.detalle
 
 import android.media.MediaPlayer
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -79,59 +81,63 @@ fun DetalleScreen(vm: DetalleViewModel, onVolver: () -> Unit) {
         }
         Spacer(Modifier.height(18.dp))
 
-        sueno?.sueno?.audioPath?.let { ruta ->
-            ReproductorAudio(ruta)
+        // Con sueños largos el contenido excede la pantalla: el formulario scrollea y los
+        // botones de guardar/borrar quedan FIJOS abajo, siempre alcanzables.
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+            sueno?.sueno?.audioPath?.let { ruta ->
+                ReproductorAudio(ruta)
+                Spacer(Modifier.height(14.dp))
+            }
+
+            TextField(
+                value = titulo,
+                onValueChange = vm::actualizarTitulo,
+                shape = RoundedCornerShape(16.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().testTag("campo-titulo"),
+            )
+            Spacer(Modifier.height(12.dp))
+
+            TextField(
+                value = texto,
+                onValueChange = vm::actualizarTexto,
+                placeholder = {
+                    Text(
+                        "Cuenta el sueño…",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                shape = RoundedCornerShape(20.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
+                minLines = 6,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 220.dp).testTag("campo-texto"),
+            )
             Spacer(Modifier.height(14.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                MarcaChip("Lúcido", Icons.Filled.AutoAwesome, Ambar, lucido, onAlternar = vm::alternarLucido)
+                MarcaChip("Pesadilla", Icons.Filled.DarkMode, Coral, pesadilla, onAlternar = vm::alternarPesadilla)
+            }
+            Spacer(Modifier.height(16.dp))
+            SelectorMarcado("Ánimo (1–5)", mood, vm::marcarMood)
+            Spacer(Modifier.height(14.dp))
+            SelectorMarcado("Claridad (1–5)", claridad, vm::marcarClaridad)
+            Spacer(Modifier.height(20.dp))
         }
-
-        TextField(
-            value = titulo,
-            onValueChange = vm::actualizarTitulo,
-            shape = RoundedCornerShape(16.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                cursorColor = MaterialTheme.colorScheme.primary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().testTag("campo-titulo"),
-        )
-        Spacer(Modifier.height(12.dp))
-
-        TextField(
-            value = texto,
-            onValueChange = vm::actualizarTexto,
-            placeholder = {
-                Text(
-                    "Cuenta el sueño…",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            },
-            shape = RoundedCornerShape(20.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                cursorColor = MaterialTheme.colorScheme.primary,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
-            minLines = 6,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 220.dp).testTag("campo-texto"),
-        )
-        Spacer(Modifier.height(14.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            MarcaChip("Lúcido", Icons.Filled.AutoAwesome, Ambar, lucido, onAlternar = vm::alternarLucido)
-            MarcaChip("Pesadilla", Icons.Filled.DarkMode, Coral, pesadilla, onAlternar = vm::alternarPesadilla)
-        }
-        Spacer(Modifier.height(16.dp))
-        SelectorMarcado("Ánimo (1–5)", mood, vm::marcarMood)
-        Spacer(Modifier.height(14.dp))
-        SelectorMarcado("Claridad (1–5)", claridad, vm::marcarClaridad)
-        Spacer(Modifier.height(20.dp))
 
         Button(
             onClick = { scope.launch { vm.guardarCambios(); onVolver() } },

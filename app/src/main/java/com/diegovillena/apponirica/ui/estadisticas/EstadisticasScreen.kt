@@ -67,7 +67,7 @@ fun EstadisticasScreen(vm: EstadisticasViewModel, onFiltrarPalabra: (String, Str
                     TarjetaStat("Este mes", (est.meses.entries.firstOrNull()?.value ?: 0).toString(), Modifier.weight(1f))
                 }
                 Spacer(Modifier.height(26.dp))
-                Text("Palabras clave más usadas", style = MaterialTheme.typography.titleLarge)
+                Text("Palabras clave más recurrentes", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(14.dp))
                 if (est.topPalabras.isEmpty()) {
                     Text(
@@ -76,7 +76,7 @@ fun EstadisticasScreen(vm: EstadisticasViewModel, onFiltrarPalabra: (String, Str
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else {
-                    val maximo = est.topPalabras.first().totalCount.coerceAtLeast(1)
+                    val maximo = est.topPalabras.first().dreamCount.coerceAtLeast(1)
                     est.topPalabras.forEachIndexed { indice, palabra ->
                         Column(
                             Modifier
@@ -91,14 +91,14 @@ fun EstadisticasScreen(vm: EstadisticasViewModel, onFiltrarPalabra: (String, Str
                                     modifier = Modifier.weight(1f),
                                 )
                                 Text(
-                                    palabra.totalCount.toString(),
+                                    if (palabra.dreamCount == 1) "1 sueño" else "${palabra.dreamCount} sueños",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                             Spacer(Modifier.height(4.dp))
                             BarraConteo(
-                                palabra.totalCount.toFloat() / maximo,
+                                palabra.dreamCount.toFloat() / maximo,
                                 color = MaterialTheme.colorScheme.primary.copy(
                                     alpha = (1f - indice * 0.045f).coerceAtLeast(0.55f),
                                 ),

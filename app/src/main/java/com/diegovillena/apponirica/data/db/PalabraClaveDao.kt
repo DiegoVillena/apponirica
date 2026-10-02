@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PalabraClaveDao {
-    @Query("SELECT * FROM keywords ORDER BY totalCount DESC, dreamCount DESC LIMIT :limite")
+    /** El ranking es por PRESENCIA: una palabra vale 1 por sueño, diganla 1 o 10 veces
+     *  en el mismo (totalCount solo desempata a igual número de sueños). */
+    @Query("SELECT * FROM keywords ORDER BY dreamCount DESC, totalCount DESC LIMIT :limite")
     fun topPalabras(limite: Int): Flow<List<PalabraClave>>
 
     @Query("SELECT * FROM keywords WHERE stem = :stem LIMIT 1")
